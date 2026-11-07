@@ -1,0 +1,36 @@
+{
+  "name": "orange-hrm-automation-cypress",
+  "version": "1.0.0",
+  "private": false,
+  "description": "Cypress + TypeScript end-to-end automation framework for the OrangeHRM demo application.",
+  "scripts": {
+    "prepare": "husky",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run --browser chrome",
+    "test": "cypress run --browser chrome",
+    "test:headed": "cypress run --headed --browser chrome",
+    "test:login": "cypress run --browser chrome --spec cypress/e2e/login/login.cy.ts",
+    "test:users": "cypress run --browser chrome --spec cypress/e2e/user-management/users.cy.ts",
+    "test:attachments": "cypress run --browser chrome --spec cypress/e2e/attachments/attachments.cy.ts",
+    "test:dashboard": "cypress run --browser chrome --spec cypress/e2e/dashboard/dashboard.cy.ts",
+    "test:vacancies": "cypress run --browser chrome --spec cypress/e2e/recruitment/vacancies.cy.ts",
+    "test:ci": "node scripts/run-cypress-ci.mjs",
+    "report:open": "opener cypress/reports/html/index.html",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "validate": "npm run typecheck && npm run lint"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@faker-js/faker": "10.6.0",
+    "@types/node": "26.6.6",
+    "cypress": "16.2.1",
+    "cypress-mochawesome-reporter": "5.0.0",
+    "dotenv": "18.0.9",
+    "eslint": "^9.39.5",
+    "husky": "^9.1.7",
+    "opener": "1.5.2",
+    "typescript": "5.8.3",
+    "typescript-eslint": "^8.36.0"
+  }
+}

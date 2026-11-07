@@ -1,0 +1,16 @@
+{
+  "invalidPasswordCases": [
+    {
+      "id": "wrong-password",
+      "username": null,
+      "password": "definitely-not-the-demo-password",
+      "expectedAlert": "Invalid credentials"
+    },
+    {
+      "id": "unknown-user",
+      "username": "not_a_real_orangehrm_user",
+      "password": "WrongPass123!",
+      "expectedAlert": "Invalid credentials"
+    }
+  ]
+}

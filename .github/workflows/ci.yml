@@ -1,0 +1,49 @@
+name: Cypress CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+      ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
+      ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run validate
+
+      - name: Require E2E credentials
+        run: |
+          if [ -z "$ORANGEHRM_USERNAME" ] || [ -z "$ORANGEHRM_PASSWORD" ]; then
+            echo "ORANGEHRM_USERNAME and ORANGEHRM_PASSWORD secrets are required for E2E tests."
+            exit 1
+          fi
+
+      - name: Run Cypress end-to-end tests
+        run: npm run test:ci
+
+      - name: Upload Cypress report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-report
+          path: cypress/reports/html/index.html
+          if-no-files-found: ignore

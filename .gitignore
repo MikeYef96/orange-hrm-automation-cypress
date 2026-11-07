@@ -1,0 +1,32 @@
+node_modules/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Test output and generated artifacts
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/*
+!cypress/downloads/.gitkeep
+cypress/uploads/*
+!cypress/uploads/.gitkeep
+cypress/reports/
+coverage/
+.nyc_output/
+
+# Build and temporary files
+dist/
+build/
+tmp/
+temp/
+*.log
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
