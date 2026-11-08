@@ -29,7 +29,7 @@ On Windows PowerShell, create the local environment file with `Copy-Item .env.ex
 Set the following values in `.env`:
 
 ```dotenv
-CYPRESS_BASE_URL=orangehrm-base-url
+CYPRESS_BASE_URL=https://opensource-demo.orangehrmlive.com
 ORANGEHRM_USERNAME=your-demo-username
 ORANGEHRM_PASSWORD=your-demo-password
 ```
@@ -55,7 +55,7 @@ Credentials are read from the environment, not embedded in test code. Successful
 | `npm run validate`         | Run TypeScript and ESLint checks    |
 | `npm run report:open`      | Open the generated HTML report      |
 
-The report is written under `cypress/reports/html/` after a Cypress run.
+The self-contained HTML report is written under `cypress/reports/html/` after a Cypress run. CI uploads this directory as the `cypress-report` workflow artifact. After successful tests on `main`, CI also publishes only this directory to GitHub Pages.
 
 ## Local Git checks
 
@@ -64,6 +64,8 @@ Husky installs Git hooks when dependencies are installed. Before each commit, th
 ## Continuous integration
 
 GitHub Actions runs TypeScript checking, ESLint, and Cypress E2E tests on pushes to `main`, pull requests targeting `main`, and manual dispatches. Feature-branch changes are checked when their pull request targets `main`; feature-branch pushes do not trigger separate CI runs. Add the repository secrets `ORANGEHRM_USERNAME` and `ORANGEHRM_PASSWORD` under **Settings → Secrets and variables → Actions**. `CYPRESS_BASE_URL` is an optional override; it defaults to the OrangeHRM demo URL. CI fails explicitly if credentials are unavailable, and the CI runner fails if Cypress reports zero tests, pending tests, skipped tests, or failures. This also means fork pull requests without secrets cannot complete the required workflow. The HTML report is uploaded as a workflow artifact when a Cypress run generates it.
+
+To publish reports, set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**. The workflow deploys only after all checks pass on `main` (push or manual dispatch), never from pull requests. It publishes only `cypress/reports/html/`; videos, screenshots, environment files, and logs are not included. GitHub Pages may be public, so keep test data and report output free of personal or sensitive information. The deployment job alone receives the Pages write and OIDC permissions.
 
 ## Project structure
 
@@ -85,7 +87,7 @@ tsconfig.json           Strict TypeScript compiler settings
 - `cy.loginAsAdmin()` caches an authenticated session and validates that it remains usable.
 - Faker generates unique usernames, employee details, passwords, attachment names, descriptions, and file content.
 - Login failure examples live in `cypress/fixtures/users.json`.
-- User-management tests create a unique employee through the authenticated application API, then create, search, update, and delete the system user through the UI.
+- User-management tests create a unique employee through the authenticated application API, then create an ESS user, verify its details, change the role to Admin and verify it, disable and verify it, and delete it through the UI before confirming it is absent from search.
 - Vacancy tests use real job titles and hiring managers, create a unique vacancy through the UI, and delete it through the API after each run.
 - Dashboard tests validate Sub Unit and Location API response shapes, unique categories, and non-negative integer counts, then compare the rendered chart legends with the categories and conditional `Other`/`Unassigned` labels derived from the responses. They do not hardcode volatile counts or labels.
 
@@ -96,7 +98,7 @@ User-management, attachment, and vacancy specs return API cleanup chains from `a
 ## Scenarios covered
 
 - Login success, invalid password, required-field validation, and logout
-- User creation, search, role/status/employee verification, update, deletion, and absence from search
+- User creation as ESS, role update to Admin, status update to Disabled, verification after each change, deletion, and absence from search
 - Text attachment upload with explicit MIME type, description/list verification, exact downloaded-content and response-type checks, and deletion
 - Dashboard Sub Unit and Location API data, count validity, rendered chart dimensions, response-matched legends, and negative checks for missing, duplicate, or unexpected labels
 - Vacancy filtering with two filters, a guaranteed no-match combination based on a real vacancy's opposite status, and reset verification

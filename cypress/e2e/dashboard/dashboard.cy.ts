@@ -137,7 +137,7 @@ describe('Dashboard data validation', () => {
     dashboardPage.visit();
   });
 
-  it('renders Sub Unit categories from the API and validates distribution counts', () => {
+  it('validates Sub Unit API response counts and rendered categories', () => {
     dashboardPage.getWidget(SUB_UNIT_TITLE);
     dashboardPage.getWidgetTitle(SUB_UNIT_TITLE).should('be.visible');
     dashboardPage.getChartGraphic(SUB_UNIT_TITLE).should('have.length.at.least', 1);
@@ -151,7 +151,7 @@ describe('Dashboard data validation', () => {
     dashboardPage.getWidgetBody(SUB_UNIT_TITLE).should('not.contain.text', LOCATION_TITLE);
   });
 
-  it('renders Location categories from the API and validates distribution counts', () => {
+  it('validates Location API response counts and rendered categories', () => {
     dashboardPage.getWidget(LOCATION_TITLE);
     dashboardPage.getWidgetTitle(LOCATION_TITLE).should('be.visible');
     dashboardPage.getChartGraphic(LOCATION_TITLE).should('have.length.at.least', 1);

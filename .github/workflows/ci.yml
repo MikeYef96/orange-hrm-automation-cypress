@@ -14,10 +14,6 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
-      ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
-      ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -31,19 +27,50 @@ jobs:
       - run: npm run validate
 
       - name: Require E2E credentials
+        env:
+          ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
+          ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
         run: |
           if [ -z "$ORANGEHRM_USERNAME" ] || [ -z "$ORANGEHRM_PASSWORD" ]; then
-            echo "ORANGEHRM_USERNAME and ORANGEHRM_PASSWORD secrets are required for E2E tests."
+            echo "::error::Set the ORANGEHRM_USERNAME and ORANGEHRM_PASSWORD Actions secrets to run E2E tests."
             exit 1
           fi
 
       - name: Run Cypress end-to-end tests
+        env:
+          CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+          ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
+          ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
         run: npm run test:ci
+
+      - name: Upload report for GitHub Pages
+        if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: cypress/reports/html/
 
       - name: Upload Cypress report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-report
-          path: cypress/reports/html/index.html
-          if-no-files-found: ignore
+          path: cypress/reports/html/
+          if-no-files-found: warn
+
+  deploy:
+    needs: checks
+    if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    steps:
+      - name: Deploy report to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
