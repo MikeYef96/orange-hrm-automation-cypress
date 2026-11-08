@@ -7,6 +7,7 @@ import {
 } from '../../utils/apiClient';
 import { createSystemUserData } from '../../utils/testData';
 import {
+  OrangeHrmRole,
   OrangeHrmStatus,
   type CreatedEmployee,
   type SystemUserRecord,
@@ -61,11 +62,21 @@ describe('User Management', () => {
     });
 
     usersPage.openEditForUsername(user.username);
+    usersPage.changeRole(OrangeHrmRole.Admin);
+    usersPage.searchByUsername(user.username);
+    usersPage.assertUserInResults({
+      username: user.username,
+      role: OrangeHrmRole.Admin,
+      status: user.status,
+      employeeName: employee.displayName,
+    });
+
+    usersPage.openEditForUsername(user.username);
     usersPage.changeStatus(OrangeHrmStatus.Disabled);
     usersPage.searchByUsername(user.username);
     usersPage.assertUserInResults({
       username: user.username,
-      role: user.role,
+      role: OrangeHrmRole.Admin,
       status: OrangeHrmStatus.Disabled,
       employeeName: employee.displayName,
     });

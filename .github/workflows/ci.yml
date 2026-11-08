@@ -14,10 +14,6 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
-      ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
-      ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -31,13 +27,20 @@ jobs:
       - run: npm run validate
 
       - name: Require E2E credentials
+        env:
+          ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
+          ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
         run: |
           if [ -z "$ORANGEHRM_USERNAME" ] || [ -z "$ORANGEHRM_PASSWORD" ]; then
-            echo "ORANGEHRM_USERNAME and ORANGEHRM_PASSWORD secrets are required for E2E tests."
+            echo "::error::Set the ORANGEHRM_USERNAME and ORANGEHRM_PASSWORD Actions secrets to run E2E tests."
             exit 1
           fi
 
       - name: Run Cypress end-to-end tests
+        env:
+          CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+          ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
+          ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
         run: npm run test:ci
 
       - name: Upload Cypress report
@@ -45,5 +48,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cypress-report
-          path: cypress/reports/html/index.html
-          if-no-files-found: ignore
+          path: cypress/reports/html/
+          if-no-files-found: warn
