@@ -32,7 +32,9 @@ export class UserManagementPage extends BasePage {
     cy.contains('h6', 'Add User').should('be.visible');
   }
 
-  fillUserForm(user: Pick<SystemUserRecord, 'username' | 'password' | 'role' | 'status' | 'employeeName'>): void {
+  fillUserForm(
+    user: Pick<SystemUserRecord, 'username' | 'password' | 'role' | 'status' | 'employeeName'>,
+  ): void {
     this.selectDropdownOption('User Role', user.role);
     this.selectAutocompleteSuggestion('Employee Name', user.employeeName);
     this.selectDropdownOption('Status', user.status);
@@ -53,7 +55,9 @@ export class UserManagementPage extends BasePage {
     this.assertLoaded();
   }
 
-  assertUserInResults(user: Pick<SystemUserRecord, 'username' | 'role' | 'status' | 'employeeName'>): void {
+  assertUserInResults(
+    user: Pick<SystemUserRecord, 'username' | 'role' | 'status' | 'employeeName'>,
+  ): void {
     this.getRowByText(user.username).within(() => {
       cy.contains(user.username).should('be.visible');
       cy.contains(user.role).should('be.visible');

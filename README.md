@@ -10,6 +10,7 @@ Maintainable end-to-end automation for the public OrangeHRM demo, built with Cyp
 - `dotenv` for local credentials
 - `cypress-mochawesome-reporter` for HTML reports
 - ESLint with the TypeScript ESLint recommended rules
+- Prettier for consistent formatting
 
 ## Prerequisites
 
@@ -38,32 +39,34 @@ Credentials are read from the environment, not embedded in test code. Successful
 
 ## Running tests
 
-| Command                    | Description                         |
-| -------------------------- | ----------------------------------- |
-| `npm test`                 | Run all specs headlessly in Chrome  |
-| `npm run cypress:run`      | Run all specs headlessly in Chrome  |
+| Command                    | Description                                              |
+| -------------------------- | -------------------------------------------------------- |
+| `npm test`                 | Run all specs headlessly in Chrome                       |
+| `npm run cypress:run`      | Run all specs headlessly in Chrome                       |
 | `npm run test:ci`          | Run all specs; fail if none, pending, skipped, or failed |
-| `npm run test:headed`      | Run all specs in visible Chrome     |
-| `npm run cypress:open`     | Open the Cypress interactive runner |
-| `npm run test:login`       | Run login tests                     |
-| `npm run test:users`       | Run user-management tests           |
-| `npm run test:attachments` | Run attachment tests                |
-| `npm run test:dashboard`   | Run dashboard tests                 |
-| `npm run test:vacancies`   | Run recruitment/vacancies tests     |
-| `npm run typecheck`        | Type-check without emitting files   |
-| `npm run lint`             | Run ESLint                          |
-| `npm run validate`         | Run TypeScript and ESLint checks    |
-| `npm run report:open`      | Open the generated HTML report      |
+| `npm run test:headed`      | Run all specs in visible Chrome                          |
+| `npm run cypress:open`     | Open the Cypress interactive runner                      |
+| `npm run test:login`       | Run login tests                                          |
+| `npm run test:users`       | Run user-management tests                                |
+| `npm run test:attachments` | Run attachment tests                                     |
+| `npm run test:dashboard`   | Run dashboard tests                                      |
+| `npm run test:vacancies`   | Run recruitment/vacancies tests                          |
+| `npm run format`           | Format supported project files with Prettier             |
+| `npm run format:check`     | Check formatting without modifying files                 |
+| `npm run typecheck`        | Type-check without emitting files                        |
+| `npm run lint`             | Run ESLint                                               |
+| `npm run validate`         | Run TypeScript, ESLint, and Prettier checks              |
+| `npm run report:open`      | Open the generated HTML report                           |
 
 The self-contained HTML report is written under `cypress/reports/html/` after a Cypress run. CI uploads this directory as the `cypress-report` workflow artifact. After successful tests on `main`, CI also publishes only this directory to GitHub Pages.
 
 ## Local Git checks
 
-Husky installs Git hooks when dependencies are installed. Before each commit, the `pre-commit` hook runs `npm run validate` (TypeScript and ESLint). Cypress E2E tests are not run automatically during commit or push; run them manually with `npm test` when needed. Pull requests targeting `main` run the configured CI checks and E2E tests; the workflow fails if its required credentials are unavailable.
+Husky installs Git hooks when dependencies are installed. Before each commit, the `pre-commit` hook runs `npm run validate` (TypeScript, ESLint, and Prettier). Cypress E2E tests are not run automatically during commit or push; run them manually with `npm test` when needed. Pull requests targeting `main` run the configured CI checks and E2E tests; the workflow fails if its required credentials are unavailable.
 
 ## Continuous integration
 
-GitHub Actions runs TypeScript checking, ESLint, and Cypress E2E tests on pushes to `main`, pull requests targeting `main`, and manual dispatches. Feature-branch changes are checked when their pull request targets `main`; feature-branch pushes do not trigger separate CI runs. Add the repository secrets `ORANGEHRM_USERNAME` and `ORANGEHRM_PASSWORD` under **Settings → Secrets and variables → Actions**. `CYPRESS_BASE_URL` is an optional override; it defaults to the OrangeHRM demo URL. CI fails explicitly if credentials are unavailable, and the CI runner fails if Cypress reports zero tests, pending tests, skipped tests, or failures. This also means fork pull requests without secrets cannot complete the required workflow. The HTML report is uploaded as a workflow artifact when a Cypress run generates it.
+GitHub Actions runs TypeScript checking, ESLint, Prettier formatting validation, and Cypress E2E tests on pushes to `main`, pull requests targeting `main`, and manual dispatches. Feature-branch changes are checked when their pull request targets `main`; feature-branch pushes do not trigger separate CI runs. Add the repository secrets `ORANGEHRM_USERNAME` and `ORANGEHRM_PASSWORD` under **Settings → Secrets and variables → Actions**. `CYPRESS_BASE_URL` is an optional override; it defaults to the OrangeHRM demo URL. CI fails explicitly if credentials are unavailable, and the CI runner fails if Cypress reports zero tests, pending tests, skipped tests, or failures. This also means fork pull requests without secrets cannot complete the required workflow. The HTML report is uploaded as a workflow artifact when a Cypress run generates it.
 
 To publish reports, set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**. The workflow deploys only after all checks pass on `main` (push or manual dispatch), never from pull requests. It publishes only `cypress/reports/html/`; videos, screenshots, environment files, and logs are not included. GitHub Pages may be public, so keep test data and report output free of personal or sensitive information. The deployment job alone receives the Pages write and OIDC permissions.
 

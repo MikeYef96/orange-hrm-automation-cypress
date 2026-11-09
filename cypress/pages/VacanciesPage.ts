@@ -26,18 +26,16 @@ export class VacanciesPage extends BasePage {
   }
 
   getRecordsSummary(): Cypress.Chainable<string> {
-    return this.recordsFoundLabel().invoke('text').then((text) => text.trim());
+    return this.recordsFoundLabel()
+      .invoke('text')
+      .then((text) => text.trim());
   }
 
   selectFilter(label: string, option: string): void {
     this.selectDropdownOption(label, option);
   }
 
-  addVacancy(
-    name: string,
-    jobTitle: string,
-    manager: OrangeHrmHiringManager,
-  ): void {
+  addVacancy(name: string, jobTitle: string, manager: OrangeHrmHiringManager): void {
     this.clickAddButton();
     cy.contains('h6', 'Add Vacancy').should('be.visible');
     this.typeIntoLabeledInput('Vacancy Name', name);

@@ -1,0 +1,16 @@
+node_modules/
+
+# Tests and test data are intentionally left unchanged.
+cypress/e2e/
+cypress/fixtures/
+
+# Generated Cypress output
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+cypress/uploads/
+cypress/reports/
+
+# Local environment files
+.env
+.env.*

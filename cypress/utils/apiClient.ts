@@ -84,8 +84,9 @@ export function findUserIdByUsername(username: string): Cypress.Chainable<number
     url: '/web/index.php/api/v2/admin/users',
     qs: { username, limit: 50 },
   }).then<number | undefined>((response) => {
-    const userId = getListData<OrangeHrmUser>(response, 'User cleanup lookup')
-      .find((user) => user.userName === username)?.id;
+    const userId = getListData<OrangeHrmUser>(response, 'User cleanup lookup').find(
+      (user) => user.userName === username,
+    )?.id;
     return cy.wrap(userId, { log: false });
   });
 }
@@ -167,8 +168,10 @@ export function findAttachmentId(
     url: `/web/index.php/api/v2/pim/employees/${empNumber}/screen/personal/attachments`,
     qs: { limit: 50 },
   }).then<number | undefined>((response) => {
-    const attachmentId = getListData<OrangeHrmAttachment>(response, 'Attachment cleanup lookup')
-      .find((item) => item.filename === fileName)?.id;
+    const attachmentId = getListData<OrangeHrmAttachment>(
+      response,
+      'Attachment cleanup lookup',
+    ).find((item) => item.filename === fileName)?.id;
     return cy.wrap(attachmentId, { log: false });
   });
 }
