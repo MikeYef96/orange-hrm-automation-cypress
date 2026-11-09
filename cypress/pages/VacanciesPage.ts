@@ -1,13 +1,8 @@
-import { BasePage } from './BasePage';
+import { NavigablePage } from './NavigablePage';
 import type { OrangeHrmHiringManager } from '../support/types';
 
-export class VacanciesPage extends BasePage {
+export class VacanciesPage extends NavigablePage {
   readonly path = '/web/index.php/recruitment/viewJobVacancy';
-
-  visit(): void {
-    cy.visit(this.path);
-    this.assertLoaded();
-  }
 
   assertLoaded(): void {
     cy.url().should('include', '/recruitment/viewJobVacancy');
@@ -43,8 +38,7 @@ export class VacanciesPage extends BasePage {
     this.selectFirstAutocompleteSuggestion('Hiring Manager', manager.firstName);
     this.clickButton('Save');
     cy.url().should('match', /\/recruitment\/addJobVacancy\/\d+$/);
-    cy.visit(this.path);
-    this.assertLoaded();
+    this.visit();
   }
 
   assertEveryVisibleRowContains(expected: string): void {

@@ -14,6 +14,7 @@ describe('My Info — Attachments', () => {
 
   beforeEach(() => {
     file = createAttachmentFile();
+    empNumber = undefined;
     cleanupFileName = file.fileName;
 
     cy.loginAsAdmin();
@@ -39,10 +40,14 @@ describe('My Info — Attachments', () => {
     });
   });
 
-  it('uploads, lists, downloads, and deletes an attachment with matching file content', () => {
+  it('uploads and lists an attachment with its description', () => {
     attachmentsPage.upload(file);
     attachmentsPage.assertListed(file);
+  });
 
+  it('downloads an attachment with matching file content', () => {
+    attachmentsPage.upload(file);
+    attachmentsPage.assertListed(file);
     attachmentsPage.download(file.fileName).then((downloadUrl) => {
       cy.request({
         url: downloadUrl,
@@ -55,7 +60,11 @@ describe('My Info — Attachments', () => {
         expect(response.body).to.eq(file.contents);
       });
     });
+  });
 
+  it('deletes an attachment and confirms it is no longer listed', () => {
+    attachmentsPage.upload(file);
+    attachmentsPage.assertListed(file);
     attachmentsPage.delete(file.fileName);
     attachmentsPage.assertNotListed(file.fileName);
     cleanupFileName = undefined;
