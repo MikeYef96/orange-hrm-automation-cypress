@@ -6,7 +6,8 @@ export class DashboardPage extends BasePage {
   private readonly userMenu = '.oxd-userdropdown-tab';
   private readonly logoutLink = 'a[href*="logout"]';
   private readonly widget = '.orangehrm-dashboard-widget';
-  private readonly widgetHeader = '.orangehrm-dashboard-widget-header, .orangehrm-dashboard-widget-name';
+  private readonly widgetHeader =
+    '.orangehrm-dashboard-widget-header, .orangehrm-dashboard-widget-name';
   private readonly widgetBody = '.orangehrm-dashboard-widget-body';
 
   visit(): void {

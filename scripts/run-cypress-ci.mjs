@@ -18,7 +18,9 @@ async function runCypress() {
     throw new Error('CI requires at least one E2E test; Cypress reported zero tests.');
   }
   if (totalFailed > 0) {
-    throw new Error(`CI does not allow failed E2E tests; Cypress reported ${totalFailed} failure(s).`);
+    throw new Error(
+      `CI does not allow failed E2E tests; Cypress reported ${totalFailed} failure(s).`,
+    );
   }
   if (totalPending > 0 || totalSkipped > 0) {
     throw new Error(

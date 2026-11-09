@@ -18,11 +18,14 @@ export class AttachmentsPage extends BasePage {
 
   upload(file: AttachmentFile): void {
     this.openAddForm();
-    cy.get(this.fileInput).selectFile({
-      contents: Cypress.Buffer.from(file.contents),
-      fileName: file.fileName,
-      mimeType: file.mimeType,
-    }, { force: true });
+    cy.get(this.fileInput).selectFile(
+      {
+        contents: Cypress.Buffer.from(file.contents),
+        fileName: file.fileName,
+        mimeType: file.mimeType,
+      },
+      { force: true },
+    );
     this.getTextareaByLabel('Comment').clear().type(file.description);
     cy.contains('h6', 'Add Attachment')
       .closest('.orangehrm-card-container')

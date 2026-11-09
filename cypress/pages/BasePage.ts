@@ -1,12 +1,12 @@
-const escapeRegExp = (value: string): string =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export class BasePage {
   protected readonly spinner = '.oxd-loading-spinner, .oxd-form-loader';
   protected readonly toast = '.oxd-toast';
   protected readonly toastMessage = '.oxd-text--toast-message, .oxd-toast-content-text';
   protected readonly tableBody = '.oxd-table-body';
-  protected readonly tableCard = '.oxd-table-body > .oxd-table-card, .oxd-table-body > .oxd-table-row';
+  protected readonly tableCard =
+    '.oxd-table-body > .oxd-table-card, .oxd-table-body > .oxd-table-row';
   protected readonly mainMenuItem = '.oxd-main-menu-item';
   protected readonly topbarHeader = '.oxd-topbar-header-breadcrumb, .oxd-text--h6';
 
@@ -68,8 +68,10 @@ export class BasePage {
         return parts.join(' ') === expectedName.replace(/\s+/g, ' ').trim().toLowerCase();
       }
 
-      return parts[0] === expectedName.firstName.toLowerCase() &&
-        parts[parts.length - 1] === expectedName.lastName.toLowerCase();
+      return (
+        parts[0] === expectedName.firstName.toLowerCase() &&
+        parts[parts.length - 1] === expectedName.lastName.toLowerCase()
+      );
     };
 
     this.labeledGroup(label).find('input').clear().type(query);
@@ -94,7 +96,9 @@ export class BasePage {
       })
       .then(() => {
         this.getInputByLabel(label).should(($input) => {
-          expect(matchesExpectedName(String($input.val())), 'selected autocomplete result').to.eq(true);
+          expect(matchesExpectedName(String($input.val())), 'selected autocomplete result').to.eq(
+            true,
+          );
         });
       });
   }
@@ -125,9 +129,11 @@ export class BasePage {
   }
 
   confirmDelete(): void {
-    cy.get('.oxd-dialog-container, .oxd-sheet').filter(':visible').within(() => {
-      cy.contains('button', 'Yes, Delete').click();
-    });
+    cy.get('.oxd-dialog-container, .oxd-sheet')
+      .filter(':visible')
+      .within(() => {
+        cy.contains('button', 'Yes, Delete').click();
+      });
   }
 
   getToast(): Cypress.Chainable<JQuery<HTMLElement>> {
@@ -143,7 +149,10 @@ export class BasePage {
   }
 
   recordsFoundLabel(): Cypress.Chainable<JQuery<HTMLElement>> {
-    return cy.contains('.orangehrm-horizontal-padding, .orangehrm-paper-container', /Records Found|No Records Found/);
+    return cy.contains(
+      '.orangehrm-horizontal-padding, .orangehrm-paper-container',
+      /Records Found|No Records Found/,
+    );
   }
 
   getVisibleTableRows(): Cypress.Chainable<JQuery<HTMLElement>> {
