@@ -1,12 +1,7 @@
-import { BasePage } from './BasePage';
+import { NavigablePage } from './NavigablePage';
 
-export class MyInfoPage extends BasePage {
+export class MyInfoPage extends NavigablePage {
   readonly path = '/web/index.php/pim/viewMyDetails';
-
-  visit(): void {
-    cy.visit(this.path);
-    this.assertLoaded();
-  }
 
   openFromMenu(): void {
     this.navigateToMenu('My Info');

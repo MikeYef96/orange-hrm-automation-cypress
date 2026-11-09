@@ -1,5 +1,6 @@
 import { RecruitmentPage } from '../../pages/RecruitmentPage';
 import { VacanciesPage } from '../../pages/VacanciesPage';
+import { DashboardPage } from '../../pages/DashboardPage';
 import {
   createEmployeeViaApi,
   deleteEmployeeViaApi,
@@ -8,87 +9,103 @@ import {
   listJobTitles,
 } from '../../utils/apiClient';
 import { createVacancyName } from '../../utils/testData';
+import type { OrangeHrmHiringManager, OrangeHrmJobTitle } from '../../support/types';
 
 const recruitmentPage = new RecruitmentPage();
 const vacanciesPage = new VacanciesPage();
+const dashboardPage = new DashboardPage();
 
 describe('Recruitment — Job Vacancies', () => {
   let vacancyName: string;
   let hiringManagerEmpNumber: number | undefined;
+  let jobTitle: OrangeHrmJobTitle;
+  let hiringManager: OrangeHrmHiringManager;
 
   beforeEach(() => {
     vacancyName = createVacancyName();
     hiringManagerEmpNumber = undefined;
     cy.loginAsAdmin();
-    cy.visit('/web/index.php/dashboard/index');
+    dashboardPage.visit();
     recruitmentPage.openVacancies();
     vacanciesPage.assertLoaded();
-  });
 
-  afterEach(() => {
-    return deleteVacancyByName(vacancyName).then(() => {
-      if (hiringManagerEmpNumber === undefined) {
-        return cy.wrap(null, { log: false });
+    listJobTitles().then((jobTitles) => {
+      const firstJobTitle = jobTitles[0];
+      if (!firstJobTitle) {
+        throw new Error('Cannot run vacancy filters: the demo has no job titles available.');
       }
-      return deleteEmployeeViaApi(hiringManagerEmpNumber);
+      jobTitle = firstJobTitle;
+
+      return listHiringManagers().then((managers) => {
+        const existingManager = managers[0];
+        if (existingManager) {
+          hiringManager = existingManager;
+          return;
+        }
+
+        return createEmployeeViaApi().then((employee) => {
+          hiringManagerEmpNumber = employee.empNumber;
+          return listHiringManagers().then((availableManagers) => {
+            const createdManager = availableManagers.find(
+              (availableManager) => availableManager.empNumber === employee.empNumber,
+            );
+            if (!createdManager) {
+              throw new Error(
+                'Cannot run vacancy filters: the created employee is not available as a hiring manager.',
+              );
+            }
+            hiringManager = createdManager;
+          });
+        });
+      });
+    }).then(() => {
+      vacanciesPage.addVacancy(vacancyName, jobTitle.title, hiringManager);
     });
   });
 
-  it('creates a vacancy, filters it, verifies no-match, then restores the full list', () => {
-    listJobTitles().then((jobTitles) => {
-      const jobTitle = jobTitles[0];
-      if (!jobTitle) {
-        throw new Error('Cannot run vacancy filters: the demo has no job titles available.');
-      }
+  afterEach(() => {
+    return deleteVacancyByName(vacancyName)
+      .then(() =>
+        hiringManagerEmpNumber === undefined
+          ? cy.wrap(null, { log: false })
+          : deleteEmployeeViaApi(hiringManagerEmpNumber),
+      );
+  });
 
-      listHiringManagers()
-        .then((managers) => {
-          if (managers[0]) {
-            return cy.wrap(managers[0], { log: false });
-          }
+  it('filters a created vacancy by its name and job title, then restores the full list', () => {
+    vacanciesPage.getRecordsSummary().as('initialResults');
+    vacanciesPage.selectFilter('Vacancy', vacancyName);
+    vacanciesPage.selectFilter('Job Title', jobTitle.title);
+    vacanciesPage.search();
+    vacanciesPage.getVisibleTableRows().should('have.length', 1);
+    vacanciesPage.assertEveryVisibleRowContains(vacancyName);
+    vacanciesPage.assertEveryVisibleRowContains(jobTitle.title);
+    vacanciesPage.assertEveryVisibleRowContains('Active');
 
-          return createEmployeeViaApi().then((employee) => {
-            hiringManagerEmpNumber = employee.empNumber;
-            return listHiringManagers().then((availableManagers) => {
-              const createdManager = availableManagers.find(
-                (availableManager) => availableManager.empNumber === employee.empNumber,
-              );
-              if (!createdManager) {
-                throw new Error(
-                  'Cannot run vacancy filters: the created employee is not available as a hiring manager.',
-                );
-              }
-              return createdManager;
-            });
-          });
-        })
-        .then((manager) => {
-          vacanciesPage.addVacancy(vacancyName, jobTitle.title, manager);
-          vacanciesPage.getRecordsSummary().as('initialResults');
+    vacanciesPage.reset();
+    cy.get<string>('@initialResults').then((initialResults) => {
+      vacanciesPage.getRecordsSummary().should((restoredResults) => {
+        expect(restoredResults.replace(/\s+/g, ' ')).to.eq(
+          initialResults.replace(/\s+/g, ' '),
+        );
+      });
+    });
+  });
 
-          vacanciesPage.selectFilter('Vacancy', vacancyName);
-          vacanciesPage.selectFilter('Job Title', jobTitle.title);
-          vacanciesPage.search();
-          vacanciesPage.getVisibleTableRows().should('have.length', 1);
-          vacanciesPage.assertEveryVisibleRowContains(vacancyName);
-          vacanciesPage.assertEveryVisibleRowContains(jobTitle.title);
-          vacanciesPage.assertEveryVisibleRowContains('Active');
+  it('returns no records for a closed created vacancy and restores the full list', () => {
+    vacanciesPage.getRecordsSummary().as('initialResults');
+    vacanciesPage.selectFilter('Vacancy', vacancyName);
+    vacanciesPage.selectFilter('Status', 'Closed');
+    vacanciesPage.search();
+    vacanciesPage.assertNoRecords();
 
-          vacanciesPage.reset();
-          vacanciesPage.selectFilter('Vacancy', vacancyName);
-          vacanciesPage.selectFilter('Status', 'Closed');
-          vacanciesPage.search();
-          vacanciesPage.assertNoRecords();
-
-          vacanciesPage.reset();
-          cy.get<string>('@initialResults').then((initialResults) => {
-            vacanciesPage.getRecordsSummary().should((restoredResults) => {
-              expect(restoredResults.replace(/\s+/g, ' ')).to.eq(
-                initialResults.replace(/\s+/g, ' '),
-              );
-            });
-          });
-        });
+    vacanciesPage.reset();
+    cy.get<string>('@initialResults').then((initialResults) => {
+      vacanciesPage.getRecordsSummary().should((restoredResults) => {
+        expect(restoredResults.replace(/\s+/g, ' ')).to.eq(
+          initialResults.replace(/\s+/g, ' '),
+        );
+      });
     });
   });
 });

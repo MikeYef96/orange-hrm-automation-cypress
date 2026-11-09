@@ -1,6 +1,6 @@
 import { LoginPage } from '../../pages/LoginPage';
 import { DashboardPage } from '../../pages/DashboardPage';
-import type { InvalidPasswordCase } from '../../support/types';
+import invalidPasswordData from '../../fixtures/users.json';
 
 const loginPage = new LoginPage();
 const dashboardPage = new DashboardPage();
@@ -33,33 +33,31 @@ describe('Login', () => {
     cy.url().should('include', '/auth/login');
   });
 
-  it('rejects invalid credentials from the users fixture', () => {
-    cy.fixture('users').then((data: { invalidPasswordCases: InvalidPasswordCase[] }) => {
-      data.invalidPasswordCases.forEach((testCase) => {
-        const verifyInvalidLogin = (testUsername: string): void => {
-          loginPage.visit();
-          loginPage.login(testUsername, testCase.password);
-          loginPage.getCredentialAlert().should('contain.text', testCase.expectedAlert);
-          loginPage.assertLoaded();
-        };
+  invalidPasswordData.invalidPasswordCases.forEach((testCase) => {
+    it(`rejects invalid credentials (${testCase.id})`, () => {
+      const verifyInvalidLogin = (username: string): void => {
+        loginPage.login(username, testCase.password);
+        loginPage.getCredentialAlert().should('contain.text', testCase.expectedAlert);
+        loginPage.assertLoaded();
+      };
 
-        if (testCase.username === null) {
-          cy.env(['username']).then((credentials) => {
-            if (typeof credentials.username !== 'string' || !credentials.username) {
-              throw new Error('Set ORANGEHRM_USERNAME in .env to run invalid-password cases.');
-            }
-            verifyInvalidLogin(credentials.username);
-          });
-        } else {
-          verifyInvalidLogin(testCase.username);
-        }
-      });
+      if (testCase.username === null) {
+        cy.env(['username']).then((credentials) => {
+          if (typeof credentials.username !== 'string' || !credentials.username) {
+            throw new Error('Set ORANGEHRM_USERNAME in .env to run invalid-password cases.');
+          }
+          verifyInvalidLogin(credentials.username);
+        });
+        return;
+      }
+
+      verifyInvalidLogin(testCase.username);
     });
   });
 
   it('logs out and returns to the login page', () => {
     cy.loginAsAdmin();
-    cy.visit('/web/index.php/dashboard/index');
+    dashboardPage.visit();
     dashboardPage.assertLoaded();
     dashboardPage.logout();
     loginPage.assertLoaded();

@@ -1,6 +1,6 @@
-import { BasePage } from './BasePage';
+import { NavigablePage } from './NavigablePage';
 
-export class LoginPage extends BasePage {
+export class LoginPage extends NavigablePage {
   readonly path = '/web/index.php/auth/login';
 
   private readonly usernameInput = 'input[name="username"]';
@@ -9,11 +9,6 @@ export class LoginPage extends BasePage {
   private readonly alertContent = '.oxd-alert-content-text';
   private readonly fieldError = '.oxd-input-field-error-message';
   private readonly loginTitle = '.orangehrm-login-title, .oxd-text--h5';
-
-  visit(): void {
-    cy.visit(this.path);
-    this.assertLoaded();
-  }
 
   assertLoaded(): void {
     cy.url().should('include', '/auth/login');

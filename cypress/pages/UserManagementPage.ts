@@ -1,14 +1,9 @@
-import { BasePage } from './BasePage';
+import { NavigablePage } from './NavigablePage';
 import { OrangeHrmRole, OrangeHrmStatus, type SystemUserRecord } from '../support/types';
 
-export class UserManagementPage extends BasePage {
+export class UserManagementPage extends NavigablePage {
   readonly path = '/web/index.php/admin/viewSystemUsers';
   readonly savePath = '/web/index.php/admin/saveSystemUser';
-
-  visit(): void {
-    cy.visit(this.path);
-    this.assertLoaded();
-  }
 
   assertLoaded(): void {
     cy.url().should('include', '/admin/viewSystemUsers');

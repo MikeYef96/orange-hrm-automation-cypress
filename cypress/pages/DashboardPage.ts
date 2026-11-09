@@ -1,6 +1,6 @@
-import { BasePage } from './BasePage';
+import { NavigablePage } from './NavigablePage';
 
-export class DashboardPage extends BasePage {
+export class DashboardPage extends NavigablePage {
   readonly path = '/web/index.php/dashboard/index';
 
   private readonly userMenu = '.oxd-userdropdown-tab';
@@ -9,11 +9,6 @@ export class DashboardPage extends BasePage {
   private readonly widgetHeader =
     '.orangehrm-dashboard-widget-header, .orangehrm-dashboard-widget-name';
   private readonly widgetBody = '.orangehrm-dashboard-widget-body';
-
-  visit(): void {
-    cy.visit(this.path);
-    this.assertLoaded();
-  }
 
   assertLoaded(): void {
     cy.url().should('include', '/dashboard');
